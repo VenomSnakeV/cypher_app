@@ -1,4 +1,8 @@
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -11,10 +15,10 @@ public class client extends JFrame {
     private JTextField field_ip;
     private JTextField field_puerto;
     private JTextField field_nick;
+    private JTextField field_mensaje;
     private JButton desconectarseButton;
     private JButton conectarseButton;
     private JButton enviarButton;
-    private JTextField field_mensaje;
 
     private String username, address = "localhost";
     private ArrayList users = new ArrayList();
@@ -29,15 +33,33 @@ public class client extends JFrame {
     public static void main(String[] args){
         client client_gui_form = new client();
         client_gui_form.setVisible(true);
-
     }
 
     private client() {
+        mainFrame.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        Color default_color = new Color(43, 109, 123);
+
+        desconectarseButton.setBackground(default_color);
+        conectarseButton.setBackground(default_color);
+        enviarButton.setBackground(default_color);
+
+        field_nick.setBorder(BorderFactory.createLineBorder(Color.black, 1));
+        field_puerto.setBorder(BorderFactory.createLineBorder(Color.black, 1));
+        field_ip.setBorder(BorderFactory.createLineBorder(Color.black, 1));
+        field_mensaje.setBorder(BorderFactory.createLineBorder(Color.black, 1));
+
+        field_nick.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        field_puerto.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        field_ip.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        field_mensaje.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        log_client.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         add(mainFrame);
         setTitle("myCypher_client");
         setSize(700, 500);
-
+        setResizable(false);
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("img/ico.png")));
 
         enviarButton.addActionListener(new ActionListener() {
             @Override
@@ -51,7 +73,7 @@ public class client extends JFrame {
                         writer.println(username + ":" + field_mensaje.getText() + ":" + "Chat");
                         writer.flush(); // flushes the buffer
                     } catch (Exception ex) {
-                        log_client.append("Message was not sent. \n");
+                        log_client.append("El mensaje no se puede enviar. \n");
                     }
                     field_mensaje.setText("");
                     field_mensaje.requestFocus();
@@ -73,18 +95,18 @@ public class client extends JFrame {
                         InputStreamReader streamreader = new InputStreamReader(sock.getInputStream());
                         reader = new BufferedReader(streamreader);
                         writer = new PrintWriter(sock.getOutputStream());
-                        writer.println(username + ":has connected.:Connect");
+                        writer.println(username + ":se ha conectado.:Conectado");
                         writer.flush();
                         isConnected = true;
                     } catch (Exception ex) {
-                        log_client.append("Cannot Connect! Try Again. \n");
+                        log_client.append("No se puede conectar con el servidor. Inténtalo otra vez. \n");
                         field_nick.setEditable(true);
                     }
 
                     ListenThread();
 
                 } else if (isConnected) {
-                    log_client.append("You are already connected. \n");
+                    log_client.append("Ya estás conectado. \n");
                 }
             }
         });
@@ -95,13 +117,83 @@ public class client extends JFrame {
                 Disconnect();
             }
         });
+        conectarseButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
+                Color default_color = new Color(56, 89, 211);
+                conectarseButton.setBackground(default_color);
+            }
+        });
+        conectarseButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(MouseEvent e) {
+                super.mouseExited(e);
+                Color default_color = new Color(43, 109, 123);
+                conectarseButton.setBackground(default_color);
+            }
+        });
+        desconectarseButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
+                Color default_color = new Color(56, 89, 211);
+                desconectarseButton.setBackground(default_color);
+            }
+        });
+        desconectarseButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(MouseEvent e) {
+                super.mouseExited(e);
+                Color default_color = new Color(43, 109, 123);
+                desconectarseButton.setBackground(default_color);
+            }
+        });
+        enviarButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
+                Color default_color = new Color(56, 89, 211);
+                enviarButton.setBackground(default_color);
+            }
+        });
+        enviarButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(MouseEvent e) {
+                super.mouseExited(e);
+                Color default_color = new Color(43, 109, 123);
+                enviarButton.setBackground(default_color);
+            }
+        });
+        field_mensaje.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nothing = "";
+                if ((field_mensaje.getText()).equals(nothing)) {
+                    field_mensaje.setText("");
+                    field_mensaje.requestFocus();
+                } else {
+                    try {
+                        writer.println(username + ":" + field_mensaje.getText() + ":" + "Chat");
+                        writer.flush(); // flushes the buffer
+                    } catch (Exception ex) {
+                        log_client.append("El mensaje no se puede enviar. \n");
+                    }
+                    field_mensaje.setText("");
+                    field_mensaje.requestFocus();
+                }
+
+                field_mensaje.setText("");
+                field_mensaje.requestFocus();
+            }
+        });
     }
 
     public class IncomingReader implements Runnable {
         @Override
         public void run() {
             String[] data;
-            String stream, done = "Done", connect = "Connect", disconnect = "Disconnect", chat = "Chat";
+            String stream, done = "Hecho", connect = "Conectado", disconnect = "Desconectado", chat = "Chat";
 
             try {
                 while ((stream = reader.readLine()) != null) {
@@ -138,7 +230,7 @@ public class client extends JFrame {
     }
 
     private void userRemove(String data) {
-        log_client.append(data + " is now offline.\n");
+        log_client.append(data + " está desconectado.\n");
     }
 
     private void writeUsers() {
@@ -150,21 +242,21 @@ public class client extends JFrame {
     }
 
     private void sendDisconnect() {
-        String bye = (username + ": :Disconnect");
+        String bye = (username + ": :Desconectado");
         try {
             writer.println(bye);
             writer.flush();
         } catch (Exception e) {
-            log_client.append("Could not send Disconnect message.\n");
+            log_client.append("No se puede enviar el mensaje de desconexion.\n");
         }
     }
 
     private void Disconnect() {
         try {
-            log_client.append("Disconnected.\n");
+            log_client.append("Desconectado.\n");
             sock.close();
         } catch (Exception ex) {
-            log_client.append("Failed to disconnect. \n");
+            log_client.append("Ha fallado al intentar la desconexion. \n");
         }
         isConnected = false;
         field_nick.setEditable(true);
